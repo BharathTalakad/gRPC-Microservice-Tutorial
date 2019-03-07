@@ -3,6 +3,7 @@ module github.com/bharath/go-grpc-http-rest-microservice-tutorial
 go 1.12
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.3.3 // indirect
 	github.com/golang/protobuf v1.3.0
 	golang.org/x/net v0.0.0-20190301231341-16b79f2e4e95 // indirect
 	golang.org/x/sys v0.0.0-20190306220723-b294cbcfc56d // indirect
