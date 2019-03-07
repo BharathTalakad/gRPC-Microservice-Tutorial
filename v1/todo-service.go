@@ -25,7 +25,7 @@ type toDoServiceServer struct {
 }
 
 // NewToDoServiceServer creates ToDo service
-func NewToDoServiceServer(db *sql.DB) v1.ToDoServiceServer {
+func NewToDoServiceServer(db *sql.DB) pb.ToDoServiceServer {
 	return &toDoServiceServer{db: db}
 }
 
@@ -51,7 +51,7 @@ func (s *toDoServiceServer) connect(ctx context.Context) (*sql.Conn, error) {
 }
 
 // Create new todo task
-func (s *toDoServiceServer) Create(ctx context.Context, req *v1.CreateRequest) (*v1.CreateResponse, error) {
+func (s *toDoServiceServer) Create(ctx context.Context, req *pb.CreateRequest) (*pb.CreateResponse, error) {
 	// check if the API version requested by client is supported by server
 	if err := s.checkAPI(req.Api); err != nil {
 		return nil, err
@@ -82,14 +82,14 @@ func (s *toDoServiceServer) Create(ctx context.Context, req *v1.CreateRequest) (
 		return nil, status.Error(codes.Unknown, "failed to retrieve id for created ToDo-> "+err.Error())
 	}
 
-	return &v1.CreateResponse{
+	return &pb.CreateResponse{
 		Api: apiVersion,
 		Id:  id,
 	}, nil
 }
 
 // Read todo task
-func (s *toDoServiceServer) Read(ctx context.Context, req *v1.ReadRequest) (*v1.ReadResponse, error) {
+func (s *toDoServiceServer) Read(ctx context.Context, req *pb.ReadRequest) (*pb.ReadResponse, error) {
 	// check if the API version requested by client is supported by server
 	if err := s.checkAPI(req.Api); err != nil {
 		return nil, err
@@ -119,7 +119,7 @@ func (s *toDoServiceServer) Read(ctx context.Context, req *v1.ReadRequest) (*v1.
 	}
 
 	// get ToDo data
-	var td v1.ToDo
+	var td pb.ToDo
 	var reminder time.Time
 	if err := rows.Scan(&td.Id, &td.Title, &td.Description, &reminder); err != nil {
 		return nil, status.Error(codes.Unknown, "failed to retrieve field values from ToDo row-> "+err.Error())
@@ -134,7 +134,7 @@ func (s *toDoServiceServer) Read(ctx context.Context, req *v1.ReadRequest) (*v1.
 			req.Id))
 	}
 
-	return &v1.ReadResponse{
+	return &pb.ReadResponse{
 		Api:  apiVersion,
 		ToDo: &td,
 	}, nil
@@ -142,7 +142,7 @@ func (s *toDoServiceServer) Read(ctx context.Context, req *v1.ReadRequest) (*v1.
 }
 
 // Update todo task
-func (s *toDoServiceServer) Update(ctx context.Context, req *v1.UpdateRequest) (*v1.UpdateResponse, error) {
+func (s *toDoServiceServer) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateResponse, error) {
 	// check if the API version requested by client is supported by server
 	if err := s.checkAPI(req.Api); err != nil {
 		return nil, err
@@ -177,14 +177,14 @@ func (s *toDoServiceServer) Update(ctx context.Context, req *v1.UpdateRequest) (
 			req.ToDo.Id))
 	}
 
-	return &v1.UpdateResponse{
+	return &pb.UpdateResponse{
 		Api:     apiVersion,
 		Updated: rows,
 	}, nil
 }
 
 // Delete todo task
-func (s *toDoServiceServer) Delete(ctx context.Context, req *v1.DeleteRequest) (*v1.DeleteResponse, error) {
+func (s *toDoServiceServer) Delete(ctx context.Context, req *pb.DeleteRequest) (*pb.DeleteResponse, error) {
 	// check if the API version requested by client is supported by server
 	if err := s.checkAPI(req.Api); err != nil {
 		return nil, err
@@ -213,14 +213,14 @@ func (s *toDoServiceServer) Delete(ctx context.Context, req *v1.DeleteRequest) (
 			req.Id))
 	}
 
-	return &v1.DeleteResponse{
+	return &pb.DeleteResponse{
 		Api:     apiVersion,
 		Deleted: rows,
 	}, nil
 }
 
 // Read all todo tasks
-func (s *toDoServiceServer) ReadAll(ctx context.Context, req *v1.ReadAllRequest) (*v1.ReadAllResponse, error) {
+func (s *toDoServiceServer) ReadAll(ctx context.Context, req *pb.ReadAllRequest) (*pb.ReadAllResponse, error) {
 	// check if the API version requested by client is supported by server
 	if err := s.checkAPI(req.Api); err != nil {
 		return nil, err
@@ -241,9 +241,9 @@ func (s *toDoServiceServer) ReadAll(ctx context.Context, req *v1.ReadAllRequest)
 	defer rows.Close()
 
 	var reminder time.Time
-	list := []*v1.ToDo{}
+	list := []*pb.ToDo{}
 	for rows.Next() {
-		td := new(v1.ToDo)
+		td := new(pb.ToDo)
 		if err := rows.Scan(&td.Id, &td.Title, &td.Description, &reminder); err != nil {
 			return nil, status.Error(codes.Unknown, "failed to retrieve field values from ToDo row-> "+err.Error())
 		}
@@ -258,7 +258,7 @@ func (s *toDoServiceServer) ReadAll(ctx context.Context, req *v1.ReadAllRequest)
 		return nil, status.Error(codes.Unknown, "failed to retrieve data from ToDo-> "+err.Error())
 	}
 
-	return &v1.ReadAllResponse{
+	return &pb.ReadAllResponse{
 		Api:   apiVersion,
 		ToDos: list,
 	}, nil
